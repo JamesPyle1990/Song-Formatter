@@ -23,7 +23,7 @@ const LyricsInput = ({ setLyrics, handleButtonClick }) => {
           justifyContent="center"
           alignItems="center"
         >
-          <Button variant="contained" color="secondary" sx={{ height: 40 }} onClick={handleButtonClick}>
+          <Button variant="contained" color="primary" sx={{ height: 40 }} onClick={handleButtonClick}>
             Format
           </Button>
         </Box>
