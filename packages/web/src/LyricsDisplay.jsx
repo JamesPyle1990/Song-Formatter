@@ -1,20 +1,6 @@
 import { useState } from "react";
-import {
-  Container,
-  Grid,
-  Typography,
-  Box,
-  Button,
-  Slider,
-  AppBar,
-  Toolbar,
-} from "@mui/material";
-import {
-  createTheme,
-  responsiveFontSizes,
-  ThemeProvider,
-} from "@mui/material/styles";
-import NavBar from "./NavBar";
+import { Container, Grid, Typography, Box, Button, Slider, AppBar, Toolbar } from "@mui/material";
+import { createTheme, responsiveFontSizes, ThemeProvider } from "@mui/material/styles";
 
 let theme = createTheme({
   palette: {
@@ -38,69 +24,6 @@ let theme = createTheme({
 theme = responsiveFontSizes(theme);
 
 const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
-  const splitLyrics = (lyrics) => {
-    let sections = {
-      verse: [],
-      chorus: [],
-      bridge: [],
-      intro: [],
-      outro: [],
-      pre: [],
-    };
-
-    let lines = lyrics.split("\n");
-    let currentSection = "";
-
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-
-      if (
-        line.startsWith("[Verse") ||
-        line.startsWith("[Chorus") ||
-        line.startsWith("[Bridge") ||
-        line.startsWith("[Intro") ||
-        line.startsWith("[Outro") ||
-        line.startsWith("[Pre") ||
-        line.startsWith("[Interlude")
-      ) {
-        currentSection = line.substring(1, line.indexOf("]")).toLowerCase();
-      } else {
-        let words = line
-          .split(" ")
-          .map((word) => ({ text: word, isChord: isChord(word) }));
-
-        sections[currentSection].push(words);
-      }
-    }
-
-    return sections;
-  };
-  const isChord = (str) => {
-    const chordRegex =
-      /\b[A-G][#b.]?(maj7#11|13|sus2|sus4|m7|#11|maj7|min7|dim7|maj9|min9|m9|dim9|maj13|min13|dim13|maj|min|dim|sus|m|7|9|11|13|add9)?\b/;
-    return chordRegex.test(str);
-  };
-
-  const processLine = (line) => {
-    return line.split(" ").map((word, index) => {
-      if (isChord(word)) {
-        return (
-          <span key={index}>
-            {word}
-          </span>
-        );
-      } else {
-        return (
-          <span key={index}>
-            {word}
-          </span>
-        );
-      }
-    });
-  };
-
-  const result = splitLyrics(lyrics);
-
   const [fontSize, setFontSize] = useState(1);
   const [lineHeight, setLineHeight] = useState(5);
 
@@ -119,6 +42,64 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
     return null; // Don't render anything if showLyrics is false
   }
 
+  const splitLyrics = (lyrics) => {
+    let sections = {
+      verse: [],
+      verse2: [],
+      verse3: [],
+      chorus1: [],
+      bridge: [],
+      intro: [],
+      outro: [],
+      pre: [],
+    };
+    let chorusCount = 0;
+    let lines = lyrics.split("\n");
+    let currentSection = "";
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+
+      let match = line.match(/\[(.*?)\]/);
+      if (match) {
+        currentSection = match[1].toLowerCase().replace(" ", "");
+        console.log(currentSection);
+
+        if (currentSection === "chorus") {
+          chorusCount++;
+          currentSection += chorusCount;
+          console.log(currentSection);
+
+          if (currentSection === "chorus1") {
+            let words = line
+              .split(" ")
+              .map((word) => ({ text: word, isChord: isChord(word) }));
+            sections[currentSection].push(words);
+          }
+        }
+      }
+      else {
+        let words = line
+          .split(" ")
+          .map((word) => ({ text: word, isChord: isChord(word) }));
+
+        if (!sections[currentSection]) {
+          sections[currentSection] = [];
+        }
+
+        sections[currentSection].push(words);
+      }
+    }
+    return sections;
+  };
+
+  const isChord = (str) => {
+    const chordRegex =
+      /\b[A-G][#b.]?(maj7#11|13|sus2|sus4|m7|#11|maj7|min7|dim7|maj9|min9|m9|dim9|maj13|min13|dim13|maj|min|dim|sus|m|7|9|11|13|add9)?\b/;
+    return chordRegex.test(str);
+  };
+
+  const result = splitLyrics(lyrics);
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -134,152 +115,212 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
         </Box>
         <Box sx={{ height: "100vh", overflowY: "auto" }}>
           <Container maxWidth="xl">
-            <Grid container spacing={4}>
-              <Grid item xs={6}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontSize: `${fontSize}em`,
-                      marginTop: 2,
-                      color: "deeppink",
-                      lineHeight: `${lineHeight}px`,
-                    }}
-                  >
-                    Intro:
-                    {result.intro.map((line, index) => (
-                      <p key={index}>
-                        {line.map((word, wordIndex) =>
-                          word.isChord ? (
-                            <span style={{ color: "red" }} key={wordIndex}>
-                              {word.text}
-                            </span>
-                          ) : (
-                            <span
-                              style={{ marginRight: "4px" }}
-                              key={wordIndex}
-                            >
-                              {word.text}
-                            </span>
-                          )
-                        )}
-                      </p>
-                    ))}
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontSize: `${fontSize}em`,
-                      marginTop: 2,
-                      color: "blue",
-                      lineHeight: `${lineHeight}px`,
-                    }}
-                  >
-                    Verse:
-                    {result.verse.map((line, index) => (
-                      <p key={index}>
-                        {line.map((word, wordIndex) =>
-                          word.isChord ? (
-                            <span style={{ color: "red" }} key={wordIndex}>
-                              {word.text}
-                            </span>
-                          ) : (
-                            <span
-                              style={{ marginRight: "4px" }}
-                              key={wordIndex}
-                            >
-                              {word.text}
-                            </span>
-                          )
-                        )}
-                      </p>
-                    ))}
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontSize: `${fontSize}em`,
-                      marginTop: 2,
-                      color: "green",
-                      lineHeight: `${lineHeight}px`,
-                    }}
-                  >
-                    Chorus:
-                    {result.chorus.map((line, index) => (
-                      <p key={index}>
-                        {line.map((word, wordIndex) =>
-                          word.isChord ? (
-                            <span style={{ color: "red" }} key={wordIndex}>
-                              {word.text}
-                            </span>
-                          ) : (
-                            <span
-                              style={{ marginRight: "4px" }}
-                              key={wordIndex}
-                            >
-                              {word.text}
-                            </span>
-                          )
-                        )}
-                      </p>
-                    ))}
-                  </Typography>
-               
-              </Grid>
+            <Grid container spacing={2}>
               <Grid item xs={6}>
                 <Typography
-  variant="subtitle1"
-  sx={{
-    fontSize: `${fontSize}em`,
-    marginTop: 2,
-    color: "purple",
-    lineHeight: `${lineHeight}px`
-  }}
->
-  Bridge:
-  {result.bridge.map((line, index) => (
-    <p key={index}>
-      {line.map((word, wordIndex) =>
-        word.isChord ? (
-          <span style={{ color: "red" }} key={wordIndex}>{word.text}</span>
-        ) : (
-          <span
-            style={{ marginRight: "4px" }}
-            key={wordIndex}
-          >
-            {word.text}
-          </span>
-        )
-      )}
-    </p>
-  ))}
-</Typography>
-<Typography
-  variant="subtitle1"
-  sx={{
-    fontSize: `${fontSize}em`,
-    marginTop: 2,
-    color: "orange",
-    lineHeight: `${lineHeight}px`
-  }}
->
-  Outro:
-  {result.outro.map((line, index) => (
-    <p key={index}>
-      {line.map((word, wordIndex) =>
-        word.isChord ? (
-          <span style={{ color: "red" }} key={wordIndex}>{word.text}</span>
-        ) : (
-          <span
-            style={{ marginRight: "4px" }}
-            key={wordIndex}
-          >
-            {word.text}
-          </span>
-        )
-      )}
-    </p>
-  ))}
-</Typography>
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "deeppink",
+                    lineHeight: "1.5em",
+                  }}
+                >
+                  {result.intro.map((line, index) => (
+                    <p key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <span style={{ color: "red" }} key={wordIndex}>
+                            {word.text}
+                          </span>
+                        ) : (
+                          <Typography key={wordIndex}>
+                            {word.text}
+                          </Typography>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </Typography>
+                {result.verse.map((line, index) => (
+                  <Typography variant="subtitle1" 
+                  key={index} sx={{ 
+                  fontSize: `${fontSize}em`, 
+                  color: "blue", 
+                  maxWidth: "80%", 
+                  lineHeight: `${lineHeight}px`,
+                  }}>
+                    {line.map((word, wordIndex) => (
+                        word.isChord ? (
+                          <span style={{ color: "red", marginRight: 50 }} key={wordIndex}>
+                            {word.text}
+                          </span>
+                        ) :
+                      <span key={wordIndex}>
+                        {word.text}{' '}
+                      </span>
+                    ))}
+                  </Typography>
+                ))}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "green",
+                    lineHeight: `${lineHeight}px`,
+                  }}
+                >
+                  {result.chorus1.map((line, index) => (
+                    <p key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <span style={{ color: "red" }} key={wordIndex}>
+                            {word.text}
+                          </span>
+                        ) : (
+                          <span
+                            style={{ marginRight: "4px" }}
+                            key={wordIndex}
+                          >
+                            {word.text}
+                          </span>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="subtitle1" sx={{
+                  fontSize: `${fontSize}em`,
+                  marginTop: 2,
+                  color: "blue",
+                  lineHeight: `${lineHeight}px`,
+                  maxWidth: "100%",
+                }}
+                >
+                  {result.verse2.map((line, index) => (
+                    <Box component="p" key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <Box component="span" color="red" key={wordIndex}>
+                            {word.text}
+                          </Box>
+                        ) : (
+                          <Box component="span" mr={1} key={wordIndex}>
+                            {word.text}
+                          </Box>
+                        )
+                      )}
+                    </Box>
+                  ))}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "blue",
+                    lineHeight: `${lineHeight}px`,
+                    maxWidth: "100%",
+                  }}
+                >
+                  {result.verse3.map((line, index) => (
+                    <Box component="p" key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <Box component="span" color="red" key={wordIndex}>
+                            {word.text}
+                          </Box>
+                        ) : (
+                          <Box component="span" mr={1} key={wordIndex}>
+                            {word.text}
+                          </Box>
+                        )
+                      )}
+                    </Box>
+                  ))}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "purple",
+                    lineHeight: `${lineHeight}px`
+                  }}
+                >
+                  {result.bridge.map((line, index) => (
+                    <p key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <span style={{ color: "red" }} key={wordIndex}>{word.text}</span>
+                        ) : (
+                          <span
+                            style={{ marginRight: "4px" }}
+                            key={wordIndex}
+                          >
+                            {word.text}
+                          </span>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "cadetblue",
+                    lineHeight: `${lineHeight}px`
+                  }}
+                >
+                  Interlude:
+                  {result.interlude.map((line, index) => (
+                    <p key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <span style={{ color: "red" }} key={wordIndex}>{word.text}</span>
+                        ) : (
+                          <span
+                            style={{ marginRight: "4px" }}
+                            key={wordIndex}
+                          >
+                            {word.text}
+                          </span>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontSize: `${fontSize}em`,
+                    marginTop: 2,
+                    color: "orange",
+                    lineHeight: `${lineHeight}px`
+                  }}
+                >
+                  {result.outro.map((line, index) => (
+                    <p key={index}>
+                      {line.map((word, wordIndex) =>
+                        word.isChord ? (
+                          <span style={{ color: "red" }} key={wordIndex}>{word.text}</span>
+                        ) : (
+                          <span
+                            style={{ marginRight: "4px" }}
+                            key={wordIndex}
+                          >
+                            {word.text}
+                          </span>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </Typography>
               </Grid>
               <Grid />
             </Grid>
@@ -293,6 +334,7 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
             sx={{ top: "auto", bottom: 0 }}
           >
             <Toolbar>
+              <Typography variant="h6"> Font Size</Typography>
               <Slider
                 value={fontSize}
                 min={0.5}
@@ -300,16 +342,16 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
                 step={0.1}
                 onChange={handleFontSizeChange}
                 aria-labelledby="font-size-slider"
-                sx={{ width: 200, marginLeft: 2, color: "white" }}
+                sx={{ width: 200, marginLeft: 2, marginRight: 5, color: "white" }}
               />
+              <Typography variant="h6"> Line Height</Typography>
               <Slider
-                defaultValue={20}
+                defaultValue={1}
                 getAriaValueText={(value) => `${value}px`}
                 aria-labelledby="discrete-slider"
                 valueLabelDisplay="auto"
-                step={1}
-                marks
-                min={2}
+                step={0.25}
+                min={20}
                 max={50}
                 onChange={handleLineHeightChange}
                 sx={{ width: 200, marginLeft: 2, color: "white" }}
