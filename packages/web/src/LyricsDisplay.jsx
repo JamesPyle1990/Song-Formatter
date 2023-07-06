@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Container, Grid, Typography, Box, Button, Slider, AppBar, Toolbar } from "@mui/material";
 
-
-
 const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
   const [fontSize, setFontSize] = useState(1);
   const [lineHeight, setLineHeight] = useState(20);
@@ -77,13 +75,13 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
     const renderedSections = {};
 
     let sectionColors = {
-      verse: "blue",
-      chorus: "green",
-      pre: "orange",
-      bridge: "purple",
+      verse: "DarkSlateBlue",
+      chorus: "DarkGreen",
+      pre: "DeepPink",
+      bridge: "DarkViolet",
     };
 
-    let defaultColors = ["black", "cyan"];
+    let defaultColors = ["DarkOrange", "DarkCyan"];
     let defaultColorIndex = 0;
 
     const renderSection = (sectionKeys, color) => (
@@ -115,10 +113,12 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
 
           return (
             <div key={index}>
-              <span>{actualSectionKey} </span>
+              <Typography variant="subtitle2" >
+                {actualSectionKey.charAt(0).toUpperCase() + actualSectionKey.slice(1)}
+              </Typography>
               {sections[sectionKey].map((line, lineIndex) => (
                 <Typography
-                  variant="subtitle1"
+                  variant="h2"
                   key={lineIndex}
                   sx={{
                     fontSize: `${fontSize}em`,
@@ -191,7 +191,7 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
                 aria-labelledby="discrete-slider"
                 valueLabelDisplay="auto"
                 step={0.25}
-                min={15}
+                min={10}
                 max={35}
                 onChange={handleLineHeightChange}
                 sx={{ width: 200, marginLeft: 2, color: "white" }}
