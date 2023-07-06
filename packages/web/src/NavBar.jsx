@@ -5,7 +5,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
 
-
 export default function NavBar() {
   return (
     <>
@@ -13,7 +12,7 @@ export default function NavBar() {
       <AppBar position="static" color='secondary'>
         <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Song Formatter
+            Charts AF
           </Typography>
         </Toolbar>
       </AppBar>
