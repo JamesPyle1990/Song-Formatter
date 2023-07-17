@@ -1,19 +1,42 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Box, TextField, Button } from "@mui/material";
+import axios from 'axios';
+
+
 
 const LyricsInput = ({ setLyrics, handleButtonClick }) => {
-  const [songName, setSongName] = useState(""); // new state for song name
-
+  const [songName, setSongName] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [parsedUrl, setParsedUrl] = useState("");
+  
+  //function to fetch data
+  const fetchData = async (songName, artistName) => {
+    try {
+      const response = await axios.get(`https://jclmcptdl1.execute-api.us-east-2.amazonaws.com/?artist=${artistName}&song=${songName}`);
+      setParsedUrl(response.data);
+      console.log('parsedUrl: ', parsedUrl.parsedUrl);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  };
+  
   // function to handle search
   const handleSearch = () => {
+    fetchData(songName, artistName);
+    
+    // if parsedUrl is not yet set (still an empty string), do nothing
+    if (!parsedUrl) return;
+  
     const encodedSearchTerm = encodeURIComponent(songName + " chords");
-    window.open(
-      `https://www.google.com/search?q=${encodedSearchTerm}`,
-      "_blank"
-    );
-  };
+    window.open(`${parsedUrl.parsedUrl}`, "_blank");
+    
+    let codeElement = document.querySelector('code');
+    if (codeElement) {
+      navigator.clipboard.writeText(codeElement.innerText);
+    }
 
+  };
   return (
     <>
       <Container maxWidth="xl">
