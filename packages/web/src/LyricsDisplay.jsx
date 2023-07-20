@@ -174,9 +174,8 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
     return (
       <>
       
-        <Box m={1} display="flex" justifyContent="right" alignItems="center">
-        </Box>
-        <Box sx={{ height: "100vh", overflowY: "auto" }}>
+        
+        <Box display="flex" flexDirection="column" minHeight="100vh" sx={{ padding: "1rem" }}>
           <Container maxWidth="xl">
             <Grid container spacing={2}>
             { !editMode &&
@@ -193,7 +192,6 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
               }
               <Grid />
             </Grid>
-  
             
       {editMode && (
         <Box display="flex">
@@ -236,7 +234,7 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
 
         <Box>
           <AppBar
-            position="fixed"
+            position="relative"
             color="secondary"
             sx={{ top: "auto", bottom: 0 }}
           >
