@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Box, TextField, Button } from "@mui/material";
 import axios from 'axios';
 
@@ -41,12 +41,6 @@ const LyricsInput = ({ setLyrics, handleButtonClick }) => {
     <>
       <Container maxWidth="xl">
         <Box>
-          <a
-            class="bookmarklet"
-            href="javascript:(function()%7Bnavigator.clipboard.writeText(document.querySelector(%22code%22).innerText)%7D)()"
-          >
-            Copy Lyrics
-          </a>
           <Box m={1} display="flex" justifyContent="center" alignItems="center">
             <TextField // new TextField for song name
               label="Enter Song Name"

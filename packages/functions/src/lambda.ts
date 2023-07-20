@@ -9,12 +9,10 @@ export const handler = ApiHandler(async (_evt) => {
   const encodedArtist = encodeURIComponent(artist);
   const encodedSong = encodeURIComponent(song);
 
-  const url = `https://www.ultimate-guitar.com/search.php?search_type=title&value=${encodedArtist}%20${encodedSong}`;
-
   return axios.get(`https://www.google.com/search?q=${encodedArtist}+${encodedSong}+chords`)
     .then(({ data }) => {
       const $ = cheerio.load(data);
-
+      console.log($.html());
       const googleResult = $('div > a:contains("ultimate-guitar")');
       const url = googleResult.attr('href');
       console.log(url);
@@ -33,6 +31,8 @@ export const handler = ApiHandler(async (_evt) => {
       console.log(parsedUrl);
       return { parsedUrl };
     })
+
+
     .catch(error => {
       console.log(error);
     });

@@ -148,7 +148,7 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
                   sx={{
                     fontSize: `${fontSize}em`,
                     color: sectionColor,
-                    lineHeight: `${lineHeight}px`
+                    lineHeight: `${lineHeight}px`,
                   }}
                 >
                   {line.map((word, wordIndex) => (
