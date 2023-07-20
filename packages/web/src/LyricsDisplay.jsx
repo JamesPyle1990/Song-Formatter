@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { Container, Grid, Typography, Box, Button, Slider, AppBar, Toolbar } from "@mui/material";
+import { Container, Grid, Typography, Box, Button, Slider, AppBar, Toolbar, TextField } from "@mui/material";
 
-const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
+
+const LyricsDisplay = ({ lyrics, showLyrics }) => {
   const [fontSize, setFontSize] = useState(1);
   const [lineHeight, setLineHeight] = useState(20);
+  const [editMode, setEditMode] = useState(false);  // Add state for edit mode
+  const [editedLyricsLeft, setEditedLyricsLeft] = useState(lyrics.slice(0, lyrics.length / 2));  
+  const [editedLyricsRight, setEditedLyricsRight] = useState(lyrics.slice(lyrics.length / 2));  
+  let newLyrics = editedLyricsLeft + '\n' + editedLyricsRight;
+  
 
   const handleLineHeightChange = (event, newValue) => {
     setLineHeight(newValue);
@@ -13,13 +19,31 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
     setFontSize(newValue);
   };
   const handleEditClick = () => {
-    setShowLyrics(false); // Hide lyrics and show text field when Edit button is clicked
+    setEditMode(true);  // Switch to edit mode when Edit button is clicked
   };
+
+  const handleSaveClick = () => {
+    setEditMode(false);
+    setLyrics(editedLyricsLeft + '\n' + editedLyricsRight);
+  };
+
+  const handleLyricsChangeLeft = (event) => {
+    const newValue = event.target.value.replace(/\n{2,}/g, '\n');  // Replace multiple newlines with a single newline
+    setEditedLyricsLeft(newValue);
+  };
+
+  const handleLyricsChangeRight = (event) => {
+    const newValue = event.target.value.replace(/\n{2,}/g, '\n');  // Replace multiple newlines with a single newline
+    setEditedLyricsRight(newValue);
+  };
+
+
 
   if (!showLyrics) {
     return null; // Don't render anything if showLyrics is false
   }
 
+  
 
   const splitLyrics = (lyrics) => {
     const isChord = (str) => {
@@ -81,6 +105,7 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
       bridge: "DarkViolet",
     };
 
+
     let defaultColors = ["DarkOrange", "DarkCyan"];
     let defaultColorIndex = 0;
 
@@ -110,7 +135,7 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
         defaultColorIndex = (defaultColorIndex + 1) % defaultColors.length;  // Increment the index, wrap back to 0 if it's past the end of the array
       }
 
-
+      
           return (
             <div key={index}>
               <Typography variant="subtitle2" >
@@ -140,30 +165,72 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
               ))}
             </div>
           );
+                    
         })}
       </>
     );
 
+
     return (
       <>
+      
         <Box m={1} display="flex" justifyContent="right" alignItems="center">
-          <Button variant="contained" color="primary" sx={{ height: 40 }} onClick={handleEditClick}>
-            Go Back
-          </Button>
         </Box>
         <Box sx={{ height: "100vh", overflowY: "auto" }}>
           <Container maxWidth="xl">
             <Grid container spacing={2}>
+            { !editMode &&
               <Grid item xs={6}>
                 <Typography sx={{ marginBottom: 4 }}>
                   {renderSection(firstHalf)}
                 </Typography>
               </Grid>
+  }
+              { !editMode &&
               <Grid item xs={6}>
                 {renderSection(secondHalf)}
               </Grid>
+              }
               <Grid />
             </Grid>
+  
+            
+      {editMode && (
+        <Box display="flex">
+          <TextField
+            multiline
+            value={editedLyricsLeft}
+            onChange={handleLyricsChangeLeft}
+          sx={{
+            flex: 1,
+              marginTop: 2, // Margin for the TextField
+              marginBottom: 2, // Margin for the TextField
+              '& .MuiInputBase-input': { // Styles for the input
+                color: 'darkslateblue', // Text color
+                fontSize: `${fontSize}em`, // Font size
+                lineHeight: `${lineHeight}px` // Line height
+              },
+            }}
+          />
+          <TextField
+            multiline
+            value={editedLyricsRight}
+            onChange={handleLyricsChangeRight}
+            sx={{
+              flex: 1,
+              marginTop: 2, // Margin for the TextField
+              marginBottom: 2, // Margin for the TextField
+              '& .MuiInputBase-input': { // Styles for the input
+                color: 'darkslateblue', // Text color
+                fontSize: `${fontSize}em`, // Font size
+                lineHeight: `${lineHeight}px` // Line height
+              },
+            }}
+          />
+        </Box>
+      )}
+         
+  
           </Container>
         </Box>
 
@@ -196,6 +263,12 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
                 onChange={handleLineHeightChange}
                 sx={{ width: 200, marginLeft: 2, color: "white" }}
               />
+              <Button variant="contained" color="primary" sx={{ height: 40, marginLeft:2 }} onClick={handleEditClick}>
+            Edit
+          </Button>
+          <Button variant="contained" color="primary" sx={{ height: 40, marginLeft:2 }} onClick={handleSaveClick}>
+            Save
+          </Button>
             </Toolbar>
           </AppBar>
         </Box>
@@ -203,7 +276,7 @@ const LyricsDisplay = ({ lyrics, showLyrics, setShowLyrics }) => {
     );
   };
 
-  const sectionComponent = splitLyrics(lyrics);
+  const sectionComponent = splitLyrics(newLyrics);
 
 
   return (
