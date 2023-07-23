@@ -3,6 +3,7 @@ import React from 'react'
 import FormatPage from './FormatPage';
 import LyricsInput from './LyricsInput';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
+import LyricsDisplay from './LyricsDisplay';
 
 
 let theme = createTheme({

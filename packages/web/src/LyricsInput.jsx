@@ -1,8 +1,8 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import { useState } from "react";
 import { Container, Box, TextField, Button } from "@mui/material";
 import axios from 'axios';
-
 
 
 const LyricsInput = ({ setLyrics, handleButtonClick }) => {
@@ -37,6 +37,9 @@ const LyricsInput = ({ setLyrics, handleButtonClick }) => {
     }
 
   };
+
+
+
   return (
     <>
       <Container maxWidth="xl">
@@ -61,7 +64,7 @@ const LyricsInput = ({ setLyrics, handleButtonClick }) => {
             label="Enter Lyrics"
             variant="outlined"
             multiline
-            rows={20}
+            rows={10}
             onChange={(event) => setLyrics(event.target.value)}
             fullWidth={true}
             sx={{ marginTop: 2 }}

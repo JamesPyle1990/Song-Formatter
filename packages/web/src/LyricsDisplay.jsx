@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Container, Grid, Typography, Box, Button, Slider, AppBar, Toolbar, TextField } from "@mui/material";
-
+import html2pdf from 'html2pdf.js'
 
 const LyricsDisplay = ({ lyrics, showLyrics }) => {
   const [fontSize, setFontSize] = useState(1);
   const [lineHeight, setLineHeight] = useState(20);
   const [editMode, setEditMode] = useState(false);  // Add state for edit mode
-  const [editedLyricsLeft, setEditedLyricsLeft] = useState(lyrics.slice(0, lyrics.length / 2));  
-  const [editedLyricsRight, setEditedLyricsRight] = useState(lyrics.slice(lyrics.length / 2));  
+  const [editedLyricsLeft, setEditedLyricsLeft] = useState(lyrics.slice(0, lyrics.length / 2));
+  const [editedLyricsRight, setEditedLyricsRight] = useState(lyrics.slice(lyrics.length / 2));
   let newLyrics = editedLyricsLeft + '\n' + editedLyricsRight;
-  
+
 
   const handleLineHeightChange = (event, newValue) => {
     setLineHeight(newValue);
@@ -43,7 +43,19 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
     return null; // Don't render anything if showLyrics is false
   }
 
-  
+  const lyricsRef = useRef();
+
+  const handleDownloadClick = () => {
+    const opt = {
+      margin: 1,
+      filename: 'myfile.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+    };
+
+    html2pdf().from(lyricsRef.current).set(opt).save();
+  }
 
   const splitLyrics = (lyrics) => {
     const isChord = (str) => {
@@ -111,31 +123,31 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
 
     const renderSection = (sectionKeys, color) => (
       <>
-      {sectionKeys.map((sectionKey, index) => {
-      // Split the sectionKey to get the actual section name without the index
-      const [actualSectionKey] = sectionKey.split(/\d/);
+        {sectionKeys.map((sectionKey, index) => {
+          // Split the sectionKey to get the actual section name without the index
+          const [actualSectionKey] = sectionKey.split(/\d/);
 
-      // Get the content of the current section as a string
-      const sectionContent = sections[sectionKey].map(line => line.map(word => word.text).join(' ')).join('\n');
+          // Get the content of the current section as a string
+          const sectionContent = sections[sectionKey].map(line => line.map(word => word.text).join(' ')).join('\n');
 
-      // If this is a section that contains "pre" or equals "chorus" and has already been rendered with the same content, skip it
-      if ((actualSectionKey === "chorus" || actualSectionKey.includes("pre")) && renderedSections[actualSectionKey] && renderedSections[actualSectionKey] === sectionContent) {
-        return null;
-      }
+          // If this is a section that contains "pre" or equals "chorus" and has already been rendered with the same content, skip it
+          if ((actualSectionKey === "chorus" || actualSectionKey.includes("pre")) && renderedSections[actualSectionKey] && renderedSections[actualSectionKey] === sectionContent) {
+            return null;
+          }
 
-      // Store the section and its content
-      renderedSections[actualSectionKey] = sectionContent;
+          // Store the section and its content
+          renderedSections[actualSectionKey] = sectionContent;
 
-      // Get the color for the section type, default to the next color in the default colors array if the section type isn't in the object
-      let sectionColor;
-      if (sectionColors[actualSectionKey]) {
-        sectionColor = sectionColors[actualSectionKey];
-      } else {
-        sectionColor = defaultColors[defaultColorIndex];
-        defaultColorIndex = (defaultColorIndex + 1) % defaultColors.length;  // Increment the index, wrap back to 0 if it's past the end of the array
-      }
+          // Get the color for the section type, default to the next color in the default colors array if the section type isn't in the object
+          let sectionColor;
+          if (sectionColors[actualSectionKey]) {
+            sectionColor = sectionColors[actualSectionKey];
+          } else {
+            sectionColor = defaultColors[defaultColorIndex];
+            defaultColorIndex = (defaultColorIndex + 1) % defaultColors.length;  // Increment the index, wrap back to 0 if it's past the end of the array
+          }
 
-      
+
           return (
             <div key={index}>
               <Typography variant="subtitle2" >
@@ -165,7 +177,7 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
               ))}
             </div>
           );
-                    
+
         })}
       </>
     );
@@ -173,73 +185,75 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
 
     return (
       <>
-      
-        
+
+
         <Box display="flex" flexDirection="column" minHeight="100vh" sx={{ padding: "1rem" }}>
           <Container maxWidth="xl">
-            <Grid container spacing={2}>
-            { !editMode &&
-              <Grid item xs={6}>
-                <Typography sx={{ marginBottom: 4 }}>
-                  {renderSection(firstHalf)}
-                </Typography>
+            <div ref={lyricsRef}>
+              <Grid container spacing={2}>
+                {!editMode &&
+                  <Grid item xs={6}>
+                    <Typography sx={{ marginBottom: 4 }}>
+                      {renderSection(firstHalf)}
+                    </Typography>
+                  </Grid>
+                }
+                {!editMode &&
+                  <Grid item xs={6}>
+                    {renderSection(secondHalf)}
+                  </Grid>
+                }
+                <Grid />
               </Grid>
-  }
-              { !editMode &&
-              <Grid item xs={6}>
-                {renderSection(secondHalf)}
-              </Grid>
-              }
-              <Grid />
-            </Grid>
-            
-      {editMode && (
-        <Box display="flex">
-          <TextField
-            multiline
-            value={editedLyricsLeft}
-            onChange={handleLyricsChangeLeft}
-          sx={{
-            flex: 1,
-              marginTop: 2, // Margin for the TextField
-              marginBottom: 2, // Margin for the TextField
-              '& .MuiInputBase-input': { // Styles for the input
-                color: 'darkslateblue', // Text color
-                fontSize: `${fontSize}em`, // Font size
-                lineHeight: `${lineHeight}px` // Line height
-              },
-            }}
-          />
-          <TextField
-            multiline
-            value={editedLyricsRight}
-            onChange={handleLyricsChangeRight}
-            sx={{
-              flex: 1,
-              marginTop: 2, // Margin for the TextField
-              marginBottom: 2, // Margin for the TextField
-              '& .MuiInputBase-input': { // Styles for the input
-                color: 'darkslateblue', // Text color
-                fontSize: `${fontSize}em`, // Font size
-                lineHeight: `${lineHeight}px` // Line height
-              },
-            }}
-          />
-        </Box>
-      )}
-         
-  
+            </div>
+
+            {editMode && (
+              <Box display="flex">
+                <TextField
+                  multiline
+                  value={editedLyricsLeft}
+                  onChange={handleLyricsChangeLeft}
+                  sx={{
+                    flex: 1,
+                    marginTop: 2, // Margin for the TextField
+                    marginBottom: 2, // Margin for the TextField
+                    '& .MuiInputBase-input': { // Styles for the input
+                      color: 'darkslateblue', // Text color
+                      fontSize: `${fontSize}em`, // Font size
+                      lineHeight: `${lineHeight}px` // Line height
+                    },
+                  }}
+                />
+                <TextField
+                  multiline
+                  value={editedLyricsRight}
+                  onChange={handleLyricsChangeRight}
+                  sx={{
+                    flex: 1,
+                    marginTop: 2, // Margin for the TextField
+                    marginBottom: 2, // Margin for the TextField
+                    '& .MuiInputBase-input': { // Styles for the input
+                      color: 'darkslateblue', // Text color
+                      fontSize: `${fontSize}em`, // Font size
+                      lineHeight: `${lineHeight}px` // Line height
+                    },
+                  }}
+                />
+              </Box>
+            )}
+
+
           </Container>
         </Box>
 
         <Box>
           <AppBar
-            position="relative"
+            position="fixed"
             color="secondary"
             sx={{ top: "auto", bottom: 0 }}
           >
             <Toolbar>
-              <Typography variant="h6"> Font Size</Typography>
+              <Typography variant="subtitle1"> Font Size</Typography>
               <Slider
                 value={fontSize}
                 min={0.5}
@@ -249,7 +263,7 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
                 aria-labelledby="font-size-slider"
                 sx={{ width: 200, marginLeft: 2, marginRight: 5, color: "white" }}
               />
-              <Typography variant="h6"> Line Height</Typography>
+              <Typography variant="subtitle1"> Line Height</Typography>
               <Slider
                 defaultValue={lineHeight}
                 getAriaValueText={(value) => `${value}px`}
@@ -261,12 +275,16 @@ const LyricsDisplay = ({ lyrics, showLyrics }) => {
                 onChange={handleLineHeightChange}
                 sx={{ width: 200, marginLeft: 2, color: "white" }}
               />
-              <Button variant="contained" color="primary" sx={{ height: 40, marginLeft:2 }} onClick={handleEditClick}>
-            Edit
-          </Button>
-          <Button variant="contained" color="primary" sx={{ height: 40, marginLeft:2 }} onClick={handleSaveClick}>
-            Save
-          </Button>
+              <Button variant="contained" color="primary" sx={{ height: 40, marginLeft: 2 }} onClick={handleEditClick}>
+                Edit
+              </Button>
+              <Button variant="contained" color="primary" sx={{ height: 40, marginLeft: 2 }} onClick={handleSaveClick}>
+                Save
+              </Button>
+              <Button variant="contained" color="primary" sx={{ height: 40, marginLeft: 2 }} onClick={handleDownloadClick}>
+                Download
+              </Button>
+
             </Toolbar>
           </AppBar>
         </Box>
