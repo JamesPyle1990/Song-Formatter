@@ -13,13 +13,15 @@ const LyricsInput = ({ setLyrics, handleButtonClick }) => {
   //function to fetch data
   const fetchData = async (songName, artistName) => {
     try {
-      const response = await axios.get(`https://jclmcptdl1.execute-api.us-east-2.amazonaws.com/?artist=${artistName}&song=${songName}`);
+      const response = await axios.get(import.meta.env.VITE_APP_API_URL + `/?artist=${artistName}&song=${songName}`);
       setParsedUrl(response.data);
       console.log('parsedUrl: ', parsedUrl.parsedUrl);
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
   };
+
+  console.log("environment variable is " + import.meta.env.VITE_APP_API_URL);
   
   // function to handle search
   const handleSearch = () => {
