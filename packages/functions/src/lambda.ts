@@ -12,12 +12,11 @@ export const handler = ApiHandler(async (_evt) => {
   return axios.get(`https://www.google.com/search?q=${encodedArtist}+${encodedSong}+chords`)
     .then(({ data }) => {
       const $ = cheerio.load(data);
-      console.log($.html());
       const googleResult = $('div > a:contains("ultimate-guitar")');
       const url = googleResult.attr('href');
-      console.log(url);
+  
 
-      function parseUrl(url) {
+      function parseUrl(url: string | undefined) {
         var parts = url.split('q=');
         if (parts.length > 1) {
           var subparts = parts[1].split('&');
@@ -28,7 +27,6 @@ export const handler = ApiHandler(async (_evt) => {
         return null;
       }
       var parsedUrl = parseUrl(url);
-      console.log(parsedUrl);
       return { parsedUrl };
     })
 

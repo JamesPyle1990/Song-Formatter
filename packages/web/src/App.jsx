@@ -1,9 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import React from 'react'
 import FormatPage from './FormatPage';
-import LyricsInput from './LyricsInput';
-import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
-import LyricsDisplay from './LyricsDisplay';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 
 
 let theme = createTheme({
