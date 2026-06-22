@@ -1,0 +1,10 @@
+{
+  "name": "helper",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local helper that downloads YouTube audio as mp3 for Song Formatter.",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
