@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Song Formatter — Bookmarklet</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; line-height: 1.6; }
+    .bm { display: inline-block; padding: 10px 18px; background: #9c27b0; color: #fff; border-radius: 6px; text-decoration: none; font-weight: 600; }
+    code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; }
+    ol { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Song Formatter Bookmarklet</h1>
+  <p>Drag this button to your bookmarks bar:</p>
+  <p>
+    <!-- The bookmarklet: scrape UG tab content and post it back to the opener (the app). -->
+    <a class="bm" href="javascript:(function(){try{var el=document.querySelector('code');var c=el?el.innerText:'';if(!c){alert('No chords found on this page.');return;}c=c.replace(/\r\n/g,'\n').trim();if(window.opener&&!window.opener.closed){window.opener.postMessage({type:'SONG_FORMATTER_LYRICS',content:c},'*');alert('Sent to Song Formatter!');}else{navigator.clipboard.writeText(c);alert('No app window open. Copied to clipboard instead.');}}catch(e){alert('Error: '+e.message);}})();">📋 Send to Song Formatter</a>
+  </p>
+
+  <h2>How to use</h2>
+  <ol>
+    <li>In Song Formatter, type an artist and song, click <strong>Search Songs</strong>.</li>
+    <li>A new Ultimate Guitar tab opens. Click a <strong>Chords</strong> version.</li>
+    <li>On that chords page, click the <strong>Send to Song Formatter</strong> bookmarklet.</li>
+    <li>The lyrics appear back in the app automatically.</li>
+  </ol>
+  <p>If dragging doesn't work, create a new bookmark manually and paste the link's URL as the address.</p>
+</body>
+</html>

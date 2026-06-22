@@ -1,89 +1,106 @@
-import React from "react";
-import { useNavigate } from 'react-router-dom';
-import { useState } from "react";
-import { Container, Box, TextField, Button } from "@mui/material";
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { Container, Box, TextField, Button, Alert } from "@mui/material";
 
+const UG_ORIGIN = "https://www.ultimate-guitar.com";
 
-const LyricsInput = ({ setLyrics, handleButtonClick }) => {
+const LyricsInput = ({ lyrics, setLyrics, handleButtonClick }) => {
   const [songName, setSongName] = useState("");
   const [artistName, setArtistName] = useState("");
-  const [parsedUrl, setParsedUrl] = useState("");
-  
-  //function to fetch data
-  const fetchData = async (songName, artistName) => {
-    try {
-      const response = await axios.get(import.meta.env.VITE_APP_API_URL + `/?artist=${artistName}&song=${songName}`);
-      setParsedUrl(response.data);
-      console.log('parsedUrl: ', parsedUrl.parsedUrl);
-    } catch (error) {
-      console.error('Error fetching data: ', error);
-    }
-  };
+  const [status, setStatus] = useState("");
 
-  console.log("environment variable is " + import.meta.env.VITE_APP_API_URL);
-  
-  // function to handle search
+  // Listen for the bookmarklet posting scraped chords back from the UG tab.
+  useEffect(() => {
+    const onMessage = (event) => {
+      let host = "";
+      try {
+        host = new URL(event.origin).hostname;
+      } catch {
+        return;
+      }
+      const fromUG =
+        host === "ultimate-guitar.com" || host.endsWith(".ultimate-guitar.com");
+      if (!fromUG) return;
+      if (event.data?.type !== "SONG_FORMATTER_LYRICS") return;
+      if (typeof event.data.content === "string") {
+        setLyrics(event.data.content);
+        setStatus("Chords received from Ultimate Guitar.");
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [setLyrics]);
+
+  // Open UG search in a new tab (the user's browser clears Cloudflare).
   const handleSearch = () => {
-    fetchData(songName, artistName);
-    
-    // if parsedUrl is not yet set (still an empty string), do nothing
-    if (!parsedUrl) return;
-  
-    const encodedSearchTerm = encodeURIComponent(songName + " chords");
-    window.open(`${parsedUrl.parsedUrl}`, "_blank");
-    
-    let codeElement = document.querySelector('code');
-    if (codeElement) {
-      navigator.clipboard.writeText(codeElement.innerText);
+    if (!songName || !artistName) {
+      setStatus("Enter both an artist and a song name.");
+      return;
     }
-
+    const value = encodeURIComponent(`${artistName} ${songName}`);
+    // sf=1 tells the Song Formatter extension to auto-pick + grab the chords.
+    window.open(
+      `${UG_ORIGIN}/search.php?search_type=title&value=${value}&sf=1`,
+      "_blank"
+    );
+    setStatus(
+      "Searching Ultimate Guitar… with the extension installed this fills in automatically. Otherwise pick a chords version and click the bookmarklet."
+    );
   };
-
-
 
   return (
-    <>
-      <Container maxWidth="xl">
-        <Box>
-          <Box m={1} display="flex" justifyContent="center" alignItems="center">
-            <TextField // new TextField for song name
-              label="Enter Song Name"
-              variant="outlined"
-              onChange={(event) => setSongName(event.target.value)}
-              sx={{ marginTop: 2 }}
-            />
-            <Button // new button to initiate search
-              variant="contained"
-              color="secondary"
-              sx={{ height: 40, marginLeft: 2 }}
-              onClick={handleSearch}
-            >
-              Search Songs
-            </Button>
-          </Box>
+    <Container maxWidth="xl">
+      <Box>
+        <Box m={1} display="flex" justifyContent="center" alignItems="center" gap={2}>
           <TextField
-            label="Enter Lyrics"
+            label="Enter Artist Name"
             variant="outlined"
-            multiline
-            rows={10}
-            onChange={(event) => setLyrics(event.target.value)}
-            fullWidth={true}
+            value={artistName}
+            onChange={(event) => setArtistName(event.target.value)}
             sx={{ marginTop: 2 }}
           />
-        </Box>
-        <Box m={1} display="flex" justifyContent="center" alignItems="center">
+          <TextField
+            label="Enter Song Name"
+            variant="outlined"
+            value={songName}
+            onChange={(event) => setSongName(event.target.value)}
+            sx={{ marginTop: 2 }}
+          />
           <Button
             variant="contained"
-            color="primary"
-            sx={{ height: 40 }}
-            onClick={handleButtonClick}
+            color="secondary"
+            sx={{ height: 40, marginTop: 2 }}
+            onClick={handleSearch}
           >
-            Format
+            Search Songs
           </Button>
         </Box>
-      </Container>
-    </>
+        {status && (
+          <Box m={1} display="flex" justifyContent="center">
+            <Alert severity="info">{status}</Alert>
+          </Box>
+        )}
+        <TextField
+          label="Enter Lyrics"
+          variant="outlined"
+          multiline
+          rows={10}
+          value={lyrics}
+          onChange={(event) => setLyrics(event.target.value)}
+          fullWidth={true}
+          sx={{ marginTop: 2 }}
+        />
+      </Box>
+      <Box m={1} display="flex" justifyContent="center" alignItems="center">
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ height: 40 }}
+          onClick={handleButtonClick}
+        >
+          Format
+        </Button>
+      </Box>
+    </Container>
   );
 };
 

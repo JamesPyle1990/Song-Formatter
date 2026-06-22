@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Song Formatter UG Grabber",
+  "version": "1.0.0",
+  "description": "Auto-grabs chords from Ultimate Guitar and sends them back to the Song Formatter app.",
+  "content_scripts": [
+    {
+      "matches": ["*://*.ultimate-guitar.com/*"],
+      "run_at": "document_idle",
+      "js": ["content.js"]
+    }
+  ]
+}

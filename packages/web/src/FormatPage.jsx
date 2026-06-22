@@ -19,7 +19,7 @@ const FormatPage = () => {
   return (
     <>
     <NavBar showLyricsInput={showLyricsInput}/>
-    {!showLyrics && <LyricsInput setLyrics={setLyrics} handleButtonClick={handleButtonClick} />}
+    {!showLyrics && <LyricsInput lyrics={lyrics} setLyrics={setLyrics} handleButtonClick={handleButtonClick} />}
     {showLyrics && <LyricsDisplay lyrics={lyrics} showLyrics={showLyrics} setShowLyrics={setShowLyrics} />}
   </>
   );
